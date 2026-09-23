@@ -11,6 +11,33 @@ on:
       - develop
 
 jobs:
+  test:
+    name: Laravel Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, dom, fileinfo, pdo_sqlite
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Prepare Laravel environment
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run Laravel tests
+        run: php artisan test
+
   docker-build:
     name: Build Docker Image
     runs-on: ubuntu-latest

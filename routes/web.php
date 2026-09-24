@@ -8,3 +8,9 @@ Route::get('/', function () {
 });
 
 Route::resource('employees', EmployeeController::class);
+
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+    ]);
+});

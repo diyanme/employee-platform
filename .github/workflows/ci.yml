@@ -1,4 +1,4 @@
-name: Employee Platform CI
+name: Employee Platform CI/CD
 
 on:
   push:
@@ -86,3 +86,25 @@ jobs:
 
           docker push $IMAGE:$TAG
           docker push $IMAGE:latest
+
+  deploy:
+    name: Deploy to Server
+    runs-on: self-hosted
+    needs: publish
+
+    steps:
+      - name: Deploy latest image
+        run: |
+          cd /opt/employee-platform
+
+          docker compose -f compose.yml pull app
+
+          docker compose -f compose.yml build nginx
+
+          docker compose -f compose.yml up -d
+
+          sleep 5
+
+          docker compose -f compose.yml exec -T app php artisan migrate --force
+
+          curl -fsS http://127.0.0.1:8000/employees > /dev/null

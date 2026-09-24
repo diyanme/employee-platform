@@ -93,9 +93,11 @@ jobs:
     needs: publish
 
     steps:
-      - name: Deploy latest image
+      - name: Deploy exact image version
         run: |
           cd /opt/employee-platform
+
+          export IMAGE_TAG=${{ github.sha }}
 
           docker compose -f compose.yml pull app
 

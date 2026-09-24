@@ -24,6 +24,9 @@
                 <p class="mt-1 text-gray-600">
                     Manage your employees
                 </p>
+                <p class="mt-2 text-sm text-green-600">
+                    CI/CD deployment test successful
+                </p>
             </div>
 
             <a href="{{ route('employees.create') }}"

@@ -87,10 +87,43 @@ jobs:
           docker push $IMAGE:$TAG
           docker push $IMAGE:latest
 
+  update-gitops:
+    name: Update GitOps Image
+    runs-on: ubuntu-latest
+    needs: publish
+
+    steps:
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v5
+        with:
+          repository: diyanme/employee-platform-gitops
+          token: ${{ secrets.GITOPS_TOKEN }}
+          path: gitops
+
+      - name: Update image tag
+        run: |
+          cd gitops
+
+          if [ "${{ github.ref_name }}" = "develop" ]; then
+            FILE="apps/staging/values.yaml"
+          else
+            FILE="apps/production/values.yaml"
+          fi
+
+          sed -i "s/^  tag: .*/  tag: ${{ github.sha }}/" "$FILE"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "$FILE"
+          git commit -m "Update ${{ github.ref_name }} image to ${{ github.sha }}" || exit 0
+          git push
+
   deploy:
     name: Deploy to Server
     runs-on: self-hosted
-    needs: publish
+    needs:
+      - update-gitops
 
     steps:
       - name: Deploy exact image version
